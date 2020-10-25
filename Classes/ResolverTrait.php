@@ -50,7 +50,6 @@ trait ResolverTrait
 
     /**
      * @param string $className
-     *
      * @return string
      */
     protected function inferTypeFromClassName(string $className): string
@@ -76,19 +75,15 @@ trait ResolverTrait
             }
         }
 
-        if ($packageKey === static::getDefaultPackageKey($this->objectManager)) {
-            if (static::getDefaultNamespace() && strpos($remaining, static::getDefaultNamespace()) === 0) {
-                $remaining = substr($remaining, strlen(static::getDefaultNamespace()));
-            } else {
-                return $className;
-            }
-            return $remaining;
-        } elseif (static::getManagedNamespace() && strpos($remaining, static::getManagedNamespace()) === 0) {
-            $remaining = substr($remaining, strlen(static::getManagedNamespace()));
+        $managedNamespace = static::getManagedNamespace($packageKey);
+        if ($managedNamespace && strpos($remaining, $managedNamespace) === 0) {
+            $remaining = substr($remaining, strlen($managedNamespace));
         } else {
             return $className;
         }
-
+        if ($packageKey === static::getDefaultPackageKey($this->objectManager)) {
+            return $remaining;
+        }
         return $packageKey . ':' . $remaining;
     }
 
@@ -152,7 +147,6 @@ trait ResolverTrait
 
     /**
      * @param string $type
-     *
      * @return string
      */
     protected function resolveObjectName(string $type): string
@@ -169,11 +163,10 @@ trait ResolverTrait
         if (\strpos($type, ':') === false) {
             $packageName = static::getDefaultPackageKey($this->objectManager);
             $objectName = $type;
-            $namespace = static::getDefaultNamespace();
         } else {
             list ($packageName, $objectName) = \explode(':', $type, 2);
-            $namespace = static::getManagedNamespace();
         }
+        $namespace = static::getManagedNamespace($packageName);
 
         $packageKeyPath = $this->packageManager->getPackage($packageName)->getNamespaces()[0];
 
@@ -208,20 +201,10 @@ trait ResolverTrait
     /**
      * The managed namespace is used between type name and package name
      *
+     * @param string $packageName
      * @return string
      */
-    abstract protected static function getManagedNamespace(): string;
-
-    /**
-     * The default namespace is used, if the default package key is used, per default it is same as "managedNamespace"
-     * @see getManagedNamespace
-     *
-     * @return string
-     */
-    protected static function getDefaultNamespace(): string
-    {
-        return static::getManagedNamespace();
-    }
+    abstract protected function getManagedNamespace(string $packageName = ''): string;
 
     /**
      * Should the prefix of the interface been appended to classNames or not

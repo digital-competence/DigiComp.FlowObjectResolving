@@ -18,19 +18,17 @@ class PluginResolver
         return PluginInterface::class;
     }
 
-    protected static function getManagedNamespace(): string
+    protected static function getManagedNamespace(string $packageName = ''): string
     {
+        if ($packageName === static::getDefaultPackageKey()) {
+            return 'Plugin\\';
+        }
         return 'FlysystemPlugin\\';
     }
 
-    protected static function getDefaultPackageKey(ObjectManagerInterface $objectManager): string
+    protected static function getDefaultPackageKey(): string
     {
         return 'league.flysystem';
-    }
-
-    protected static function getDefaultNamespace(): string
-    {
-        return 'Plugin\\';
     }
 }
 
@@ -55,8 +53,6 @@ which used the trait, if not overriden.
 
 The `ObjectManagerInterface` in `getDefaultPackageKey` is there, because this function makes use of the `CompileStatic` feature of flow.
 
-The name is build in the scheme: `{packageKey}{nameSpace}{name}` - if `{packageKey}` is the default package key, the 
-default namespace is used for `{namespace}`, otherwise the mandatory `mangedNamespace` is used. If you do not override
-`getDefaultNamesapce` namespace is assumed to be the same as the managed one.
+The name is build in the scheme: `{packageKey}{nameSpace}{name}` - if you need to have different Namespaces for different packages, you should implement your conditions, or even use configuration in getManagedNamespace - you'll get the packageKey as argument, as shown above.
 
 Classes which do not follow the default pattern can still be used, and will be listed, with the FQCN.
