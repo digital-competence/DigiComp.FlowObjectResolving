@@ -40,6 +40,6 @@ feature of flow.
 
 The name is build in the scheme: `{packageKey}{namespace}{name}` - if you need to have different namespaces for
 different packages, you should implement your conditions, or even use configuration in `getManagedNamespace` - you'll get
-the packageKey as argument, as shown above.
+the packageKey as argument (even if not shown above).
 
 Classes which do not follow the default pattern can still be used, and will be listed, with the FQCN.
