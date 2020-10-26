@@ -33,7 +33,8 @@ class DefaultResolverTest extends FunctionalTestCase
     public function itResolvesByNameToARequestPattern()
     {
         $resolver = new DefaultResolver();
-        $csrfProtection = $resolver->create('Neos.Flow:CsrfProtection', []);
+        $objectName = $resolver->resolveObjectName('Neos.Flow:CsrfProtection');
+        $csrfProtection = new $objectName();
         $this->assertInstanceOf(CsrfProtection::class, $csrfProtection);
     }
 }
