@@ -8,7 +8,7 @@ Additionally, it allows you to get a list of all those nice names, so you could 
 you want to.
 
 ```php
-class RequestPatternResolver                   
+class DefaultResolver
 {
     use ResolverTrait;
 
@@ -20,11 +20,6 @@ class RequestPatternResolver
     protected static function getManagedNamespace(): string
     {
         return 'Security\\RequestPattern\\';
-    }
-
-    protected static function appendInterfaceName(): bool
-    {
-        return false;
     }
 }
 ```  

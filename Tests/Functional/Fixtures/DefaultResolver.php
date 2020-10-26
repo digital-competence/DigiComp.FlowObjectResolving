@@ -24,12 +24,4 @@ class DefaultResolver
     {
         return 'Security\\RequestPattern\\';
     }
-
-    /**
-     * @inheritDoc
-     */
-    protected static function appendInterfaceName(): bool
-    {
-        return false;
-    }
 }
