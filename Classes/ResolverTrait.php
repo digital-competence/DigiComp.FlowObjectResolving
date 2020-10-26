@@ -215,7 +215,7 @@ trait ResolverTrait
      * @param string $packageKey
      * @return string
      */
-    abstract protected function getManagedNamespace(string $packageKey = ''): string;
+    abstract protected function getManagedNamespace(string $packageKey): string;
 
     /**
      * Whether the interface prefix should be appended to class names or not.
