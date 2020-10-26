@@ -2,7 +2,10 @@
 
 namespace DigiComp\FlowObjectResolving;
 
+use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
+use Neos\Flow\Package\Exception\UnknownPackageException;
+use Neos\Flow\Package\PackageInterface;
 use Neos\Flow\Package\PackageManager;
 use Neos\Flow\Reflection\ReflectionService;
 
@@ -21,7 +24,7 @@ trait ResolverTrait
     /**
      * @param ObjectManagerInterface $objectManager
      */
-    public function injectObjectManager(ObjectManagerInterface $objectManager)
+    public function injectObjectManager(ObjectManagerInterface $objectManager): void
     {
         $this->objectManager = $objectManager;
     }
@@ -29,7 +32,7 @@ trait ResolverTrait
     /**
      * @param PackageManager $packageManager
      */
-    public function injectPackageManager(PackageManager $packageManager)
+    public function injectPackageManager(PackageManager $packageManager): void
     {
         $this->packageManager = $packageManager;
     }
@@ -39,12 +42,12 @@ trait ResolverTrait
      */
     public function getAvailableNames(): array
     {
-        $classNames = static::getImplementationClassNames($this->objectManager);
         $names = [];
 
-        foreach (\array_keys($classNames) as $className) {
+        foreach (\array_keys(static::getImplementationClassNames($this->objectManager)) as $className) {
             $names[] = $this->inferTypeFromClassName($className);
         }
+
         return $names;
     }
 
@@ -56,34 +59,38 @@ trait ResolverTrait
     {
         $packageKey = null;
         $remaining = null;
-        foreach ($this->packageManager->getAvailablePackages() as $package)
-        {
+
+        /* @var PackageInterface $package */
+        foreach ($this->packageManager->getAvailablePackages() as $package) {
             $autoloadConfiguration = $package->getFlattenedAutoloadConfiguration();
-            if (! empty($autoloadConfiguration)) {
-                if (strpos($className, $autoloadConfiguration[0]['namespace']) === 0) {
+            if ($autoloadConfiguration !== []) {
+                if (\strpos($className, $autoloadConfiguration[0]['namespace']) === 0) {
                     $packageKey = $package->getPackageKey();
-                    $remaining = substr($className, strlen($autoloadConfiguration[0]['namespace']));
+                    $remaining = \substr($className, \strlen($autoloadConfiguration[0]['namespace']));
                 }
             }
         }
 
         if (static::appendInterfaceName()) {
-            if (substr($remaining, -strlen(static::getClassNameAppendix())) === static::getClassNameAppendix()) {
-                $remaining = substr($remaining, 0, -strlen(static::getClassNameAppendix()));
+            $classNameAppendix = static::getClassNameAppendix();
+            if (\substr($remaining, -\strlen($classNameAppendix)) === $classNameAppendix) {
+                $remaining = \substr($remaining, 0, -\strlen($classNameAppendix));
             } else {
                 return $className;
             }
         }
 
         $managedNamespace = static::getManagedNamespace($packageKey);
-        if ($managedNamespace && strpos($remaining, $managedNamespace) === 0) {
-            $remaining = substr($remaining, strlen($managedNamespace));
+        if ($managedNamespace !== '' && \strpos($remaining, $managedNamespace) === 0) {
+            $remaining = \substr($remaining, \strlen($managedNamespace));
         } else {
             return $className;
         }
+
         if ($packageKey === static::getDefaultPackageKey($this->objectManager)) {
             return $remaining;
         }
+
         return $packageKey . ':' . $remaining;
     }
 
@@ -92,50 +99,52 @@ trait ResolverTrait
      * @param array $options
      * @return object
      * @throws Exception
+     * @throws UnknownPackageException
      */
     public function create(string $type, array $options = []): object
     {
         $objectName = $this->resolveObjectName($type);
-        if (! class_exists($objectName)) {
+        if (!class_exists($objectName)) {
             throw new Exception(
-                'Type ' . $type . ' resolved to ' . $objectName . ' but this class does not exist',
+                'Type ' . $type . ' resolved to ' . $objectName . ', but this class does not exist.',
                 1603541091
             );
         }
-        #TODO: What about objects, which do not have options? switchable behavior, or another resolver?
+
+        // TODO: What about objects, which do not have options? Switchable behavior, or another resolver?
         return new $objectName($options);
     }
 
     /**
-     * Returns all class names implementing the Interface.
+     * Returns all class names implementing the interface.
      *
-     * @Neos\Flow\Annotations\CompileStatic
-     *
+     * @Flow\CompileStatic
      * @param ObjectManagerInterface $objectManager
-     * @return array Array of class names implementing Interface indexed by class name
+     * @return array Array of class names implementing the interface indexed by class name.
      */
     protected static function getImplementationClassNames(ObjectManagerInterface $objectManager): array
     {
-        $reflectionService = $objectManager->get(ReflectionService::class);
-                $classNames = $reflectionService->getAllImplementationClassNamesForInterface(static::getManagedInterface());
-        return \array_flip($classNames);
+        return \array_flip(
+            $objectManager
+                ->get(ReflectionService::class)
+                ->getAllImplementationClassNamesForInterface(static::getManagedInterface())
+        );
     }
 
     /**
-     * @Neos\Flow\Annotations\CompileStatic
-     *
+     * @Flow\CompileStatic
      * @param ObjectManagerInterface $objectManager
      * @return string
      */
     protected static function getDefaultPackageKey(ObjectManagerInterface $objectManager): string
     {
-        $packageManager = $objectManager->get(PackageManager::class);
         $packageKey = 'UNKNOWN';
-        foreach ($packageManager->getAvailablePackages() as $package)
-        {
+
+        /* @var PackageInterface $package */
+        foreach ($objectManager->get(PackageManager::class)->getAvailablePackages() as $package) {
             $autoloadConfiguration = $package->getFlattenedAutoloadConfiguration();
-            if (! empty($autoloadConfiguration)) {
-                if (strpos(__CLASS__, $autoloadConfiguration[0]['namespace']) === 0) {
+            if ($autoloadConfiguration !== []) {
+                if (\strpos(__CLASS__, $autoloadConfiguration[0]['namespace']) === 0) {
                     $packageKey = $package->getPackageKey();
                 }
             }
@@ -144,38 +153,35 @@ trait ResolverTrait
         return $packageKey;
     }
 
-
     /**
      * @param string $type
      * @return string
+     * @throws UnknownPackageException
      */
     protected function resolveObjectName(string $type): string
     {
         $type = \ltrim($type, '\\');
 
-        $classNames = static::getImplementationClassNames($this->objectManager);
-
-        if ($this->objectManager->isRegistered($type) && isset($classNames[$type])) {
-            //maybe we should check for instance of here...
+        if (
+            $this->objectManager->isRegistered($type)
+            && isset(static::getImplementationClassNames($this->objectManager)[$type])
+        ) {
+            // maybe we should check for instance of here...
             return $type;
         }
 
         if (\strpos($type, ':') === false) {
-            $packageName = static::getDefaultPackageKey($this->objectManager);
+            $packageKey = static::getDefaultPackageKey($this->objectManager);
             $objectName = $type;
         } else {
-            list ($packageName, $objectName) = \explode(':', $type, 2);
+            [$packageKey, $objectName] = \explode(':', $type, 2);
         }
-        $namespace = static::getManagedNamespace($packageName);
 
-        $packageKeyPath = $this->packageManager->getPackage($packageName)->getNamespaces()[0];
-
-        $possibleClassName = \sprintf(
-            '%s%s%s',
-            $packageKeyPath,
-            $namespace,
-            $objectName
-        );
+        $possibleClassName =
+            $this->packageManager->getPackage($packageKey)->getNamespaces()[0]
+            . static::getManagedNamespace($packageKey)
+            . $objectName
+        ;
 
         if (static::appendInterfaceName()) {
             $possibleClassName .= static::getClassNameAppendix();
@@ -189,25 +195,30 @@ trait ResolverTrait
      */
     abstract protected static function getManagedInterface(): string;
 
+    /**
+     * @return string
+     */
     protected static function getClassNameAppendix(): string
     {
         if (static::appendInterfaceName()) {
             \preg_match('~.*?([^\\\\]+)Interface~', static::getManagedInterface(), $matches);
+
             return $matches[1];
         }
+
         return '';
     }
 
     /**
-     * The managed namespace is used between type name and package name
+     * The managed namespace is used between type name and package name.
      *
-     * @param string $packageName
+     * @param string $packageKey
      * @return string
      */
-    abstract protected function getManagedNamespace(string $packageName = ''): string;
+    abstract protected function getManagedNamespace(string $packageKey = ''): string;
 
     /**
-     * Should the prefix of the interface been appended to classNames or not
+     * Whether the interface prefix should be appended to class names or not.
      *
      * @return bool
      */

@@ -2,7 +2,9 @@
 
 namespace DigiComp\FlowObjectResolving\Tests\Functional;
 
+use DigiComp\FlowObjectResolving\Exception;
 use DigiComp\FlowObjectResolving\Tests\Functional\Fixtures\DefaultResolver;
+use Neos\Flow\Package\Exception\UnknownPackageException;
 use Neos\Flow\Security\RequestPattern\CsrfProtection;
 use Neos\Flow\Tests\FunctionalTestCase;
 
@@ -15,7 +17,7 @@ class DefaultResolverTest extends FunctionalTestCase
     {
         $resolver = new DefaultResolver();
         $names = $resolver->getAvailableNames();
-        $this->assertGreaterThanOrEqual(5, count($names));
+        $this->assertGreaterThanOrEqual(5, \count($names));
         $this->assertContains('Neos.Flow:ControllerObjectName', $names);
         $this->assertContains('Neos.Flow:CsrfProtection', $names);
         $this->assertContains('Neos.Flow:Host', $names);
@@ -24,6 +26,8 @@ class DefaultResolverTest extends FunctionalTestCase
     }
 
     /**
+     * @throws Exception
+     * @throws UnknownPackageException
      * @test
      */
     public function itResolvesByNameToARequestPattern()
