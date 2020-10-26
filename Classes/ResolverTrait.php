@@ -95,27 +95,6 @@ trait ResolverTrait
     }
 
     /**
-     * @param string $type
-     * @param array $options
-     * @return object
-     * @throws Exception
-     * @throws UnknownPackageException
-     */
-    public function create(string $type, array $options = []): object
-    {
-        $objectName = $this->resolveObjectName($type);
-        if (!class_exists($objectName)) {
-            throw new Exception(
-                'Type ' . $type . ' resolved to ' . $objectName . ', but this class does not exist.',
-                1603541091
-            );
-        }
-
-        // TODO: What about objects, which do not have options? Switchable behavior, or another resolver?
-        return new $objectName($options);
-    }
-
-    /**
      * Returns all class names implementing the interface.
      *
      * @Flow\CompileStatic
@@ -156,9 +135,10 @@ trait ResolverTrait
     /**
      * @param string $type
      * @return string
+     * @throws Exception
      * @throws UnknownPackageException
      */
-    protected function resolveObjectName(string $type): string
+    public function resolveObjectName(string $type): string
     {
         $type = \ltrim($type, '\\');
 
@@ -185,6 +165,13 @@ trait ResolverTrait
 
         if (static::appendInterfaceName()) {
             $possibleClassName .= static::getClassNameAppendix();
+        }
+
+        if (!\class_exists($objectName)) {
+            throw new Exception(
+                'Type ' . $type . ' resolved to ' . $objectName . ', but this class does not exist.',
+                1603541091
+            );
         }
 
         return $possibleClassName;
