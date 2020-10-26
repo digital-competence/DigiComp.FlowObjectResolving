@@ -167,9 +167,9 @@ trait ResolverTrait
             $possibleClassName .= static::getClassNameAppendix();
         }
 
-        if (!\class_exists($objectName)) {
+        if (!\class_exists($possibleClassName)) {
             throw new Exception(
-                'Type ' . $type . ' resolved to ' . $objectName . ', but this class does not exist.',
+                'Type ' . $type . ' resolved to ' . $possibleClassName . ', but this class does not exist.',
                 1603541091
             );
         }
