@@ -1,0 +1,36 @@
+workspace:
+  base: /woodpecker
+  path: package
+
+matrix:
+  include:
+    - FLOW_VERSION: 5.3
+      PHP_VERSION: 7.4
+    - FLOW_VERSION: 6.3
+      PHP_VERSION: 7.4
+    - FLOW_VERSION: 7.3
+      PHP_VERSION: 7.4
+    - FLOW_VERSION: 7.3
+      PHP_VERSION: 8.1
+    - FLOW_VERSION: 8.2
+      PHP_VERSION: 8.2
+
+
+pipeline:
+  functional-tests:
+    image: "thecodingmachine/php:${PHP_VERSION}-v4-cli"
+    environment:
+      # Enable the PDO_SQLITE extension
+      - "PHP_EXTENSION_PDO_SQLITE=1"
+      - "FLOW_VERSION=${FLOW_VERSION}"
+      - "NEOS_BUILD_DIR=/woodpecker/Build-${FLOW_VERSION}"
+    commands:
+      - "sudo mkdir $NEOS_BUILD_DIR"
+      - "sudo chown -R docker:docker $NEOS_BUILD_DIR"
+      - "cd $NEOS_BUILD_DIR"
+      - "composer create-project --no-install neos/flow-base-distribution:^$FLOW_VERSION ."
+      - "composer config repositories.repo-name path /woodpecker/package"
+      - "composer config --no-plugins allow-plugins.neos/composer-plugin true"
+      - "composer remove --dev --no-update neos/behat || composer remove --no-update neos/behat"
+      - "composer require digicomp/flowobjectresolving:@dev"
+      - "bin/phpunit --configuration Build/BuildEssentials/PhpUnit/FunctionalTests.xml Packages/Application/DigiComp.FlowObjectResolving/Tests/Functional"
