@@ -1,0 +1,8 @@
+pipeline:
+  code-style:
+    image: composer
+    commands:
+      - composer global config repositories.repo-name vcs https://git.digital-competence.de/Packages/php-codesniffer
+      - composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+      - composer global require digicomp/php-codesniffer:@dev
+      - composer global exec -- phpcs --runtime-set ignore_warnings_on_exit 1 --standard=DigiComp Classes/ Tests/

@@ -5,7 +5,6 @@ namespace DigiComp\FlowObjectResolving;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
 use Neos\Flow\Package\Exception\UnknownPackageException;
-use Neos\Flow\Package\PackageInterface;
 use Neos\Flow\Package\PackageManager;
 use Neos\Flow\Reflection\ReflectionService;
 
@@ -60,7 +59,6 @@ trait ResolverTrait
         $packageKey = null;
         $remaining = null;
 
-        /* @var PackageInterface $package */
         foreach ($this->packageManager->getAvailablePackages() as $package) {
             $autoloadConfiguration = $package->getFlattenedAutoloadConfiguration();
             if ($autoloadConfiguration !== []) {
@@ -119,7 +117,6 @@ trait ResolverTrait
     {
         $packageKey = 'UNKNOWN';
 
-        /* @var PackageInterface $package */
         foreach ($objectManager->get(PackageManager::class)->getAvailablePackages() as $package) {
             $autoloadConfiguration = $package->getFlattenedAutoloadConfiguration();
             if ($autoloadConfiguration !== []) {
