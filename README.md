@@ -1,6 +1,8 @@
 DigiComp.FlowObjectResolving
 ----------------------------
 
+![Build status](https://ci.digital-competence.de/api/badges/Packages/DigiComp.FlowObjectResolving/status.svg)
+
 This package is here to help your DI to resolve nice human readable names to class names, to the class names which, 
 should be used.
 

@@ -12,6 +12,8 @@ matrix:
       PHP_VERSION: 7.4
     - FLOW_VERSION: 7.3
       PHP_VERSION: 7.4
+    - FLOW_VERSION: 8.2
+      PHP_VERSION: 8.2
 
 pipeline:
   functional-tests:
