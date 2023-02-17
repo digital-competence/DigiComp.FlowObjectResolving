@@ -20,7 +20,7 @@ class DefaultResolver
     /**
      * @inheritDoc
      */
-    protected static function getManagedNamespace(): string
+    protected static function getManagedNamespace(string $packageKey): string
     {
         return 'Security\\RequestPattern\\';
     }
