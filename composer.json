@@ -12,8 +12,8 @@
     "homepage": "https://github.com/digital-competence/DigiComp.FlowObjectResolving",
     "keywords": ["Neos", "Flow", "dependency injection"],
     "require": {
-        "neos/flow": "^5.3 | ^6.0 | ^7.0",
-        "php": "^7.2"
+        "neos/flow": "^5.3 | ^6.0 | ^7.0 | ^8.0",
+        "php": "^7.2 | ^8.0"
     },
     "autoload": {
         "psr-4": {
@@ -27,7 +27,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-develop": "1.0.0-dev"
+            "dev-develop": "2.0.0-dev"
         },
         "applied-flow-migrations": [
             "Inwebs.Basket-201409170938",
