@@ -8,17 +8,20 @@ use Neos\Flow\Package\Exception\UnknownPackageException;
 use Neos\Flow\Package\PackageManager;
 use Neos\Flow\Reflection\ReflectionService;
 
+/**
+ * @template T
+ */
 trait ResolverTrait
 {
     /**
      * @var ObjectManagerInterface
      */
-    protected $objectManager;
+    protected ObjectManagerInterface $objectManager;
 
     /**
      * @var PackageManager
      */
-    protected $packageManager;
+    protected PackageManager $packageManager;
 
     /**
      * @param ObjectManagerInterface $objectManager
@@ -37,7 +40,7 @@ trait ResolverTrait
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
     public function getAvailableNames(): array
     {
@@ -51,10 +54,10 @@ trait ResolverTrait
     }
 
     /**
-     * @param string $className
+     * @param class-string<T> $className
      * @return string
      */
-    protected function inferTypeFromClassName(string $className): string
+    public function inferTypeFromClassName(string $className): string
     {
         $packageKey = null;
         $remaining = null;
@@ -97,7 +100,7 @@ trait ResolverTrait
      *
      * @Flow\CompileStatic
      * @param ObjectManagerInterface $objectManager
-     * @return array Array of class names implementing the interface indexed by class name.
+     * @return array<class-string<T>> Array of class names implementing the interface indexed by class name.
      */
     protected static function getImplementationClassNames(ObjectManagerInterface $objectManager): array
     {
@@ -131,7 +134,7 @@ trait ResolverTrait
 
     /**
      * @param string $type
-     * @return string
+     * @return class-string<T>
      * @throws Exception
      * @throws UnknownPackageException
      */
@@ -175,7 +178,7 @@ trait ResolverTrait
     }
 
     /**
-     * @return string
+     * @return class-string<T>
      */
     abstract protected static function getManagedInterface(): string;
 
