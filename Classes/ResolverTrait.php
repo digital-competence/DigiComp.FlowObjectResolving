@@ -54,7 +54,7 @@ trait ResolverTrait
      * @param string $className
      * @return string
      */
-    protected function inferTypeFromClassName(string $className): string
+    public function inferTypeFromClassName(string $className): string
     {
         $packageKey = null;
         $remaining = null;
