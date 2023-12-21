@@ -24,6 +24,12 @@ trait ResolverTrait
     protected PackageManager $packageManager;
 
     /**
+     * Mapping from resolved short name to flow object name
+     * @var array<string, string>
+     */
+    protected array $customObjectNameMapping = [];
+
+    /**
      * @param ObjectManagerInterface $objectManager
      */
     public function injectObjectManager(ObjectManagerInterface $objectManager): void
@@ -39,12 +45,20 @@ trait ResolverTrait
         $this->packageManager = $packageManager;
     }
 
+    public function registerObjectName(string $name, string $objectName): void
+    {
+        if (!$this->objectManager->isRegistered($objectName)) {
+            throw new UnknownObjectNameException("Object with name \"$objectName\" is not known.");
+        }
+        $this->customObjectNameMapping[$name] = $objectName;
+    }
+
     /**
      * @return array<string>
      */
     public function getAvailableNames(): array
     {
-        $names = [];
+        $names = \array_values($this->customObjectNameMapping);
 
         foreach (\array_keys(static::getImplementationClassNames($this->objectManager)) as $className) {
             $names[] = $this->inferTypeFromClassName($className);
@@ -141,6 +155,10 @@ trait ResolverTrait
     public function resolveObjectName(string $type): string
     {
         $type = \ltrim($type, '\\');
+
+        if (isset($this->customObjectNameMapping[$type])) {
+            return $this->customObjectNameMapping[$type];
+        }
 
         if (
             $this->objectManager->isRegistered($type)

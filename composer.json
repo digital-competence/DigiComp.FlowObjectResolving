@@ -27,7 +27,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-develop": "2.1.x-dev"
+            "dev-develop": "2.2.x-dev"
         },
         "applied-flow-migrations": [
             "Inwebs.Basket-201409170938",

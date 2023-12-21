@@ -9,6 +9,8 @@ should be used.
 Additionally, it allows you to get a list of all those nice names, so you could list them from a CommandController, if 
 you want to.
 
+## Resolver
+
 ```php
 class DefaultResolver
 {
@@ -45,3 +47,15 @@ different packages, you should implement your conditions, or even use configurat
 the packageKey as argument.
 
 Classes which do not follow the default pattern can still be used, and will be listed, with the FQCN.
+
+## Virtual objects
+
+And on top of that, if you want to let the resolver know about own names, not following the scheme, or even virtual objects from object manager you can register your own:
+
+```php
+    $resolver = DefaultResolver();    
+    $resolver->registerObjectName(
+        'MyObjectShortName',
+        'DigiComp.FlowObjectResolving:VirtualObjectName'
+    );
+```

@@ -1,0 +1,2 @@
+DigiComp.FlowObjectResolving:CustomRequestPattern:
+  className: Neos\Flow\Security\RequestPattern\CsrfProtection
